@@ -7,6 +7,10 @@ const db = {
   users: [
     { id: "1", email: "tien@mail.com", name: "Tien" },
     { id: "2", email: "tien@mail.com", name: "Tien" }
+  ],
+  messages: [
+    { id: "1", userID: "1", body: "Hello", createdAt: Date.now() },
+    { id: "2", userID: "2", body: "Hi", createdAt: Date.now() }
   ]
 }
 
@@ -14,6 +18,7 @@ const schema = buildSchema(`
   type Query {
     users: [User!]!
     user(id: ID!): User
+    messages: [Message!]!
   }
 
   type Mutation {
@@ -25,12 +30,20 @@ const schema = buildSchema(`
     email: String!
     name: String
     avatarUrl: String
+    messages: [Message!]!
+  }
+
+  type Message {
+    id: ID!
+    body: String!
+    createdAt: String
   }
 `)
 
 const rootValue = {
   users: () => db.users,
   user: args => db.users.find(u => u.id === args.id),
+  messages: () => db.messages,
   addUser: ({ email, name }) => {
     const user = {
       id: crypto.randomBytes(10).toString("hex"),
