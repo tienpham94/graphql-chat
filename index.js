@@ -1,6 +1,4 @@
-const express = require("express")
-const graphqlHTTP = require("express-graphql")
-const { buildSchema } = require("graphql")
+const { ApolloServer, gql } = require("apollo-server")
 const crypto = require("crypto")
 
 const db = {
@@ -9,12 +7,12 @@ const db = {
     { id: "2", email: "tien@mail.com", name: "Tien" }
   ],
   messages: [
-    { id: "1", userID: "1", body: "Hello", createdAt: Date.now() },
-    { id: "2", userID: "2", body: "Hi", createdAt: Date.now() }
+    { id: "1", userId: "1", body: "Hello", createdAt: Date.now() },
+    { id: "2", userId: "2", body: "Hi", createdAt: Date.now() }
   ]
 }
 
-const schema = buildSchema(`
+const typeDefs = gql`
   type Query {
     users: [User!]!
     user(id: ID!): User
@@ -38,44 +36,30 @@ const schema = buildSchema(`
     body: String!
     createdAt: String
   }
-`)
+`
 
-const rootValue = {
-  users: () => db.users,
-  user: args => db.users.find(u => u.id === args.id),
-  messages: () => db.messages,
-  addUser: ({ email, name }) => {
-    const user = {
-      id: crypto.randomBytes(10).toString("hex"),
-      name,
-      email
+const resolvers = {
+  Query: {
+    users: () => db.users,
+    user: (root, args) => db.users.find(u => u.id === args.id),
+    messages: () => db.messages
+  },
+  Mutation: {
+    addUser: (root, { email, name }) => {
+      const user = {
+        id: crypto.randomBytes(10).toString("hex"),
+        name,
+        email
+      }
+      db.users.push(user)
+      return user
     }
-    db.users.push(user)
-    return user
+  },
+  User: {
+    messages: user => db.messages.filter(m => m.userId === user.id)
   }
 }
 
-const query = `
-  {
-    users {
-      email
-    }
-  }
-`
+const server = new ApolloServer({ typeDefs, resolvers })
 
-const app = express()
-
-app.use(
-  "/graphql",
-  graphqlHTTP({
-    schema,
-    rootValue,
-    graphiql: true
-  })
-)
-
-app.listen(3000, () => console.log("Listening on port 3000"))
-
-// graphql(schema, query, rootValue)
-//   .then(console.log)
-//   .catch(console.error)
+server.listen().then(({ url }) => console.log(url))
