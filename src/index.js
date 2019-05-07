@@ -1,23 +1,46 @@
+import mongoose from 'mongoose'
 import { ApolloServer } from 'apollo-server-express'
 import express from 'express'
+import dotenv from 'dotenv'
 
 import typeDefs from './typeDefs'
 import resolvers from './resolvers'
 
-const { APP_PORT = 4000, NODE_ENV = 'development' } = process.env
+dotenv.config()
 
-const app = express()
+const {
+  APP_PORT = 4000,
+  NODE_ENV = 'development',
+  DB_USERNAME,
+  DB_PASSWORD,
+  DB_HOST,
+  DB_PORT,
+  DB_NAME
+} = process.env
 
-app.disable('x-powered-by')
+(async () => {
+  try {
+    await mongoose.connect(
+      `mongodb://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}`,
+      { useNewUrlParser: true }
+    )
 
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-  playground: NODE_ENV !== 'production'
-})
+    const app = express()
 
-server.applyMiddleware({
-  app
-})
+    app.disable('x-powered-by')
 
-app.listen({ port: 4000 }, () => console.log('running on http://localhost:4000/graphql'))
+    const server = new ApolloServer({
+      typeDefs,
+      resolvers,
+      playground: !IN_PROD
+    })
+
+    server.applyMiddleware({ app })
+
+    app.listen({ port: APP_PORT }, () =>
+      console.log(`http://localhost:${APP_PORT}${server.graphqlPath}`)
+    )
+  } catch (e) {
+    console.error(e)
+  }
+})()

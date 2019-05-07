@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "apollo-server-express": "^2.4.8",
+    "dotenv": "^8.0.0",
     "esm": "^3.2.22",
     "express": "^4.16.4",
     "express-graphql": "^0.8.0",
