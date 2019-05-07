@@ -1,22 +1,19 @@
 import mongoose from 'mongoose'
 import { ApolloServer } from 'apollo-server-express'
 import express from 'express'
-import dotenv from 'dotenv'
 
 import typeDefs from './typeDefs'
 import resolvers from './resolvers'
 
-dotenv.config()
-
-const {
-  APP_PORT = 4000,
-  NODE_ENV = 'development',
+import {
+  APP_PORT,
+  IN_PROD,
   DB_USERNAME,
   DB_PASSWORD,
   DB_HOST,
   DB_PORT,
   DB_NAME
-} = process.env
+} from './config'
 
 (async () => {
   try {

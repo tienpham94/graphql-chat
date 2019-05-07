@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-// import { hash } from 'bcryptjs'
+import { hash } from 'bcryptjs'
 
 const userSchema = new mongoose.Schema(
   {
@@ -13,15 +13,15 @@ const userSchema = new mongoose.Schema(
   }
 )
 
-// userSchema.pre('save', async function(next) {
-//   if (this.isModified('password')) {
-//     try {
-//       this.password = await hash(this.password, 10)
-//     } catch (e) {
-//       next(e)
-//     }
-//   }
-//   next()
-// })
+userSchema.pre('save', async function(next) {
+  if (this.isModified('password')) {
+    try {
+      this.password = await hash(this.password, 10)
+    } catch (e) {
+      next(e)
+    }
+  }
+  next()
+})
 
 export default mongoose.model('User', userSchema)
