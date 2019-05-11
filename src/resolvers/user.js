@@ -1,7 +1,7 @@
 import Joi from 'joi'
 import mongoose from 'mongoose'
 import { UserInputError } from 'apollo-server-express'
-import { SignUp } from '../schemas'
+import { signUp } from '../schemas'
 import { User } from '../models'
 
 export default {
@@ -25,7 +25,7 @@ export default {
     signUp: async (root, args, context, info) => {
       // TODO: not auth, validation
 
-      await Joi.validate(args, SignUp, { abortEarly: false })
+      await Joi.validate(args, signUp, { abortEarly: false })
 
       return User.create(args)
     }
